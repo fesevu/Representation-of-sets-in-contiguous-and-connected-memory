@@ -301,39 +301,104 @@ class LinkedList(object): #класс односвязного списка
                return res
 
        def insert(self, index, *values):
-           if self.size == 0:
-               raise IndexError("list is empty")
-
            if index == None:
                index = self.size - 1
 
            if not isinstance(index, int):
-               raise TypeError("index must be integer")    
+               raise TypeError("index must be integer")
+
+           i_start = 0 
+           if self.size == 0 and index != 0:
+               raise IndexError("list is empty")
+           elif self.size == 0 and index == 0:
+               self.head = Node(values[0])
+               i_start = 1   
 
            if index < 0:
                raise IndexError("index must be positive")
            
-           if index > (self.size - 1):
+           if (index > (self.size - 1) and self.size != 0) or (index > 0 and self.size == 0): #проверяем не вышел ли индекс за границы списка или если список пустой не больше ли индекс 0
                raise IndexError("index out of range")
            
            current_node = self.head
            i = 0
 
-           while (i != index - 1):
+           while (i != index - 1 and index != 0):
                current_node = current_node.next
                i += 1
 
            next = current_node.next #сохраняем ссылку на следующий элемент после вставки
 
-           for i in range(len(values)):
+           for i in range(i_start, len(values)):
                current_node.next = Node(values[i])
                current_node = current_node.next
 
-           current_node.next = next    
+           current_node.next = next
 
+           self.size += len(values)
+
+       def swap(self, index1, index2):
+           if self.size == 0:
+               raise IndexError("list is empty")
+
+           if (index1 > self.size - 1) or (index2 > self.size - 1):
+               raise IndexError("list index out of range")
+
+           if (index1 < 0) or (index2 < 0):
+               raise IndexError("index must be positive")
+
+           Node_head = None
+           Node1_prev = None
+           Node2_prev = None 
+           current_node = self.head
+           i = 0
+           if (index1 == 0) or (index2 == 0): #еси один из индексов 0 отдельно сохраняем указатель на начало списка
+               Node_head = self.head
+               current_node = current_node.next
+               i = 1
+
+           while (current_node.next):
+               if (i == index1 - 2):
+                   Node1_prev = current_node.next
+               if (i == index2 - 2):
+                   Node2_prev = current_node.next
+               current_node = current_node.next
+               i += 1 
+
+           if (i == index1 - 2):
+               Node1_prev = current_node.next
+           if (i == index2 - 2):
+               Node2_prev = current_node.next       
+
+           if Node_head == None: #случай когда нужно менять любые два элемента кроме головного
+               temp = Node1_prev.next
+               Node1_prev.next = Node2_prev.next
+               Node2_prev.next = temp
+
+               temp = Node1_prev.next.next
+               Node1_prev.next.next = Node2_prev.next.next
+               Node2_prev.next.next = temp
+           else: #случай когда нужно поменять головной элемент местами с другим
+               if Node1_prev == None:
+                   #сначала меняем ссылки на следующий элементы
+                   temp = Node2_prev.next.next
+                   Node2_prev.next.next = Node_head.next
+                   Node_head.next = temp
+
+                   #потом меняем ссылки на сами элементы 
+                   self.head = Node2_prev.next
+                   Node2_prev.next = Node_head
+               elif Node2_prev == None:
+                   temp = Node1_prev.next.next
+                   Node1_prev.next.next = Node_head.next
+                   Node_head.next = temp 
+                   
+                   self.head = Node1_prev.next
+                   Node1_prev.next = Node_head             
+                          
        def clear(self):
+           self.size = 0
            self.head = None
-
 
 print("Инициализация списка и вывод с помощью print: ")
 lList = LinkedList(1, 2)
@@ -368,10 +433,14 @@ print("\nВставка эллемента(ов) в список по индек
 lList.insert(1, 3, 5, [1,3,4])
 print(lList)
 
+print("\nЗамена местами двух элементов из списка по их индексам методом swap(0, 3):")
+lList.swap(0, 3)
+print(lList)
+
+print("\nУдаление всех элементов списка методом clear():")
+lList.clear()
+print(lList)
+
 print("\nУдаление списка: ")
 del lList
-print(lList)
-              
-
-
-        
+print(lList) 
